@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Info</title>
+  <style>
+    * {
+      padding: 0%;
+      margin: 0%;
+    }
+
+    body {
+      padding: 15px;
+      display: flex;
+      background-color: aliceblue;
+      flex-direction: column;
+      align-items: center;
+      margin: 20px;
+    }
+
+    .sama,
+    .tala {
+      display: flex;
+      padding: 20px;
+      margin: 20px;
+      box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+      width: 100%;
+      background-color: antiquewhite;
+      border-radius: 10px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tala {
+      justify-content: space-between;
+    }
+
+    .istam {
+      padding: 7px;
+      display: none;
+    }
+
+    .cak {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button {
+      width: 100px;
+      height: 100px;
+    }
+
+    .but {
+      display: flex;
+    }
+
+    .but div{
+      margin: 150px;
+    }
+
+    .cak {
+      display: none;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+
+<body>
+  <div class="tala">
+    <div class="ting">
+      <h1>SmartHealth</h1>
+    </div>
+    <div class="istam">
+      <a href=""><img src="{{ url_for('static', filename='patient.png') }}" alt="" width="25px" height="25px"
+          style="margin-right: 15px;"></a>
+      <a href=""><img src="{{ url_for('static', filename='logout.png') }}" alt="" width="25px" height="25px"></a>
+    </div>
+  </div>
+  <div class="sama">
+    <div class="cak">
+      <div id="chart"></div><br>
+      <div>
+        <h1 id="xy"></h1>
+        <h1 id="average"></h1>
+        <h1 id="problem"></h1>
+      </div>
+      <script>
+        var data = [];
+        var h, k, l, u;
+        var t = [];
+        var options = {
+          series: [{
+            data: data.slice()
+          }],
+          chart: {
+            id: 'realtime',
+            height: 350,
+            width: 700,
+            type: 'line',
+            animations: {
+              enabled: true,
+              easing: 'linear',
+              dynamicAnimation: {
+                speed: 1000
+              }
+            },
+            toolbar: {
+              show: false
+            },
+            zoom: {
+              enabled: false
+            }
+          },
+          dataLabels: {
+            enabled: false
+          },
+          stroke: {
+            curve: 'smooth'
+          },
+          title: {
+            text: 'Heart Rate',
+            align: 'left'
+          },
+          markers: {
+            size: 0
+          },
+          xaxis: {
+            type: 'datetime',
+            labels: {
+              formatter: function (value, timestamp) {
+                var date = new Date(value);
+                return date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+              }
+            }
+          },
+          yaxis: {
+            labels: {
+              formatter: function (value) {
+                return value.toFixed(2);
+              }
+            }
+          },
+          legend: {
+            show: false
+          },
+        };
+        var chart = new ApexCharts(document.querySelector("#chart"), options);
+        chart.render();
+        function getNewSeries() {
+          fetch('/heart_rate')
+            .then(response => response.json())
+            .then(newData => {
+              var heartRate = newData.heart_rate;
+              data.push({ x: new Date().getTime(), y: heartRate });
+              if (data.length > 10) {
+                data.shift();
+              }
+              chart.updateOptions({
+                yaxis: {
+                  min: Math.min(...data.map(item => item.y)),
+                  max: Math.max(...data.map(item => item.y))
+                }
+              });
+              chart.updateSeries([{ data: data }]);
+              document.querySelector("#xy").innerHTML = "Heart rate is:" + heartRate;
+              t.push(heartRate);
+              if (t.length === 60) {
+                h = calculateAverage(t);
+                k = calculateStandardDeviation(t);
+                l = (45 - h) / k;
+                u = (125 - h) / k;
+                document.querySelector("#average").innerHTML = "The average heart rate:" + h.toFixed(2);
+                if (l < -1000) {
+                  document.querySelector("#problem").innerHTML = "The person's heart rate is normal";
+                } else {
+                  fetch("/mail")
+                    .then(res => res.json())
+                    .then(data => {
+                      if (data.success) {
+                        document.querySelector("#problem").innerHTML = "The person has a problem";
+                      } else {
+                        document.querySelector("#problem").innerHTML = "Alert not send to doctor";
+                      }
+                    })
+                  fetch("/req")
+                    .then(res => res.json())
+                    .then(data => {
+
+                    });
+                }
+                t = [];
+              }
+            })
+            .catch(error => {
+              console.error('Error fetching data:', error);
+            });
+        }
+
+        getNewSeries();
+        window.setInterval(function () {
+          getNewSeries();
+        }, 1000);
+        function calculateAverage(numbers) {
+          if (numbers.length === 0) {
+            return null;
+          }
+          const sum = numbers.reduce((acc, num) => acc + num, 0);
+          return sum / numbers.length;
+        }
+        function calculateStandardDeviation(numbers) {
+          if (numbers.length < 2) {
+            return null;
+          }
+          const average = calculateAverage(numbers);
+          const squaredDifferences = numbers.map(num => Math.pow(num - average, 2));
+          const averageSquaredDifference = calculateAverage(squaredDifferences);
+          const standardDeviation = Math.sqrt(averageSquaredDifference);
+          return standardDeviation;
+        }
+      </script>
+    </div>
+    <div class="but">
+      <div>
+        <button onclick="toggle()">
+          Login to Doctor Profile
+        </button>
+      </div>
+      <div>
+        <button onclick="toggle()">
+          Login to Patient Profile
+        </button>
+      </div>
+    </div>
+  </div>
+  </div>
+  <script>
+    function toggle() {
+      var imageContainer = document.querySelector('.but');
+      var cakContainer = document.querySelector('.cak');
+      var cakC = document.querySelector('.istam');
+      if (imageContainer.style.display === '' || imageContainer.style.display === 'flex') {
+        imageContainer.style.display = 'none';
+        cakContainer.style.display = 'flex';
+        cakC.style.display = 'flex';
+      } else {
+        imageContainer.style.display = 'flex';
+        cakContainer.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+
+</html>
