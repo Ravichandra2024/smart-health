@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Home</title>
+    <style>
+        * {
+            padding: 0%;
+            margin: 10px;
+        }
+
+        body {
+            padding: 15px;
+            display: flex;
+            background-color: aliceblue;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px;
+        }
+
+        .pat_log ,.pat_reg{
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+            background-color: antiquewhite;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        .pat_log div,.pat_reg div{
+            margin: 5px;
+            justify-content: space-around;
+        }
+
+        h1{
+            text-align: center;
+            padding: 20px;
+        }
+
+        button{
+            width: 80px;
+            height: 40px;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="pat_log">
+        <h1>Login</h1>
+        <div>
+            <label for="pat_id">Patient Id</label>
+            <input type="text" placeholder="Enter the Patient Id">
+        </div>
+        <div>
+            <label for="pass">Password</label>
+            <input type="password" placeholder="Enter the Password">
+        </div>
+        <p onclick="reg()"><u>No Account?Sign Up Now</u></p>
+        <button>Submit</button>
+    </div>
+    <div class="pat_reg">
+        <h1>Enroll Patient</h1>
+        <div>
+            <label for="pat_name">Patient Name</label>
+            <input type="text" placeholder="Enter the Patient Name">
+        </div>
+        <div>
+            <label for="pat_id">Patient Id</label>
+            <input type="text" placeholder="Enter the Patient Id">
+        </div>
+        <div>
+            <label for="dev_id">Device Id</label>
+            <input type="text" placeholder="Enter the Device Id">
+        </div>
+        <div>
+            <label for="pass">Password</label>
+            <input type="password" placeholder="Enter the Password">
+        </div>
+        <div>
+            <label for="confpass">Confirm Password</label>
+            <input type="text" placeholder="Re-Enter the Password">
+        </div>
+        <p onclick="log()"><u>Having Account?Login Now</u></p>
+        <button>Submit</button>
+    </div>
+</body>
+
+</html>
