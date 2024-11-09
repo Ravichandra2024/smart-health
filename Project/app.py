@@ -4,9 +4,9 @@ import time
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-sender_email = "balakrishnareddya800@gmail.com"
+sender_email = "ravireddy00380@gmail.com"
 sender_password = "stzbmgzbzabbhcgt"
-receiver_email = "9921004836@klu.ac.in"
+receiver_email = "9921004095@klu.ac.in"
 app = Flask(__name__)
 ser = serial.serial_for_url('/dev/cu.usbserial-110', baudrate=9600)
 subject = "Emergency alert"
